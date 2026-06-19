@@ -1,0 +1,20 @@
+[Unit]
+Description=xwindow-tamer: rule-based, event-driven X11 window placement
+# Cinnamon does NOT activate graphical-session.target, so we key off
+# default.target. If we start before X is up, Restart=on-failure retries
+# until DISPLAY is reachable.
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/dev/xwindow-tamer
+Environment=PYTHONPATH=%h/dev/xwindow-tamer
+Environment=DISPLAY=:0
+# Uncomment if the service can't reach X without it:
+# Environment=XAUTHORITY=%h/.Xauthority
+ExecStart=/usr/bin/python3 -m window_tamer
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

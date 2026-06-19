@@ -247,9 +247,11 @@ Relevant existing files (on the host):
 - [x] **C3 planner — GREEN (7 tests)**
 - [x] **C4 executor sequencer — GREEN (6 tests)**
 - [x] **C5 engine dedup — GREEN (5 tests)**
-- [ ] Layer 2: X wiring + `--dry-run`/`--once` + smoke
-- [ ] Layer 3: UAT
+- [x] **Layer 2: X wiring + `--dry-run`/`--once` + smoke** — dry-run smoke maps
+      Calendar/Mail/Th/RPG correctly; live (non-dry) execution still needs UAT.
+- [ ] Layer 3: UAT (human — needs a watched cold Firefox restart)
 - [ ] Phase 2: port pwsafe/watcher, retire dp2, systemd unit
+      (`systemd/xwindow-tamer.service` drafted)
 
 ## 12. Open decisions (ask the user)
 
