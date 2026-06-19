@@ -1,0 +1,17 @@
+[project]
+name = "xwindow-tamer"
+version = "0.1.0"
+description = "Rule-based, event-driven X11 window placement (libwnck)."
+requires-python = ">=3.10"
+# Runtime deps are system-provided via apt (NOT pip-installable in this tree):
+#   python3-gi (PyGObject) + gir1.2-wnck-3.0  -> Wnck / GLib bindings
+#   python3-yaml                              -> rules config parsing
+# Test deps:
+#   python3-pytest
+# The daemon MUST run on the system /usr/bin/python3 because gi/Wnck come from
+# apt, not pip -- a venv without --system-site-packages cannot import Wnck.
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
