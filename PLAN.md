@@ -162,17 +162,17 @@ prove GREEN → refactor. One behavior per test.
 
 - [x] **C1 monitors** — `parse_listmonitors`: connectors, origin/width, height,
       primary flag, half-open `contains_x`, ignores header/blank lines. (6 tests GREEN)
-- [ ] **C2 rules** — `load_rules` (yaml → Rule; workspace 1→0; geometry parsed;
+- [x] **C2 rules** — `load_rules` (yaml → Rule; workspace 1→0; geometry parsed;
       patterns compiled) and `match_rule` (each FF title + pwsafe class → right
       rule; first-match-wins; no-match → None; wildcard on missing key;
       case-insensitive class).
-- [ ] **C3 planner** — `plan(rule, monitors)` exact action lists + coords for all
+- [x] **C3 planner** — `plan(rule, monitors)` exact action lists + coords for all
       five rules using the SAMPLE monitors (Calendar→`[Unmax, Move(0,0,1920,1080),
       Maximize(DP-1)]`; Th→`[Unmax, Move(1920,…), Maximize(DP-4), Minimize]`;
       RPG→`[Workspace(1)]`; pwsafe→`[Unmax, Move(centered 1025×750 on DP-4)]`).
-- [ ] **C4 executor sequencer** — control flow with a stub scheduler: advances on
+- [x] **C4 executor sequencer** — control flow with a stub scheduler: advances on
       success, retries to cap then advances, preserves order, `on_done` once.
-- [ ] **C5 engine dedup** — place-once: second `name-changed` for a placed xid is
+- [x] **C5 engine dedup** — place-once: second `name-changed` for a placed xid is
       a no-op; `window-closed` forgets the xid.
 
 ## 7. Layer 2 — wire X + dry-run (smoke)
@@ -243,10 +243,10 @@ Relevant existing files (on the host):
       (`unit`/`smoke`/`status`/`all`), `CLAUDE.md`, this `PLAN.md`
 - [x] `window_tamer/__init__.py`
 - [x] **C1 monitors — GREEN (6 tests)**
-- [ ] C2 rules
-- [ ] C3 planner
-- [ ] C4 executor sequencer
-- [ ] C5 engine dedup
+- [x] **C2 rules — GREEN (10 tests)**
+- [x] **C3 planner — GREEN (7 tests)**
+- [x] **C4 executor sequencer — GREEN (6 tests)**
+- [x] **C5 engine dedup — GREEN (5 tests)**
 - [ ] Layer 2: X wiring + `--dry-run`/`--once` + smoke
 - [ ] Layer 3: UAT
 - [ ] Phase 2: port pwsafe/watcher, retire dp2, systemd unit

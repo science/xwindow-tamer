@@ -55,3 +55,50 @@ class Engine:
     def forget(self, xid: int) -> None:
         """Forget a window (on close) so a future reopen is placed again."""
         self.placed.discard(xid)
+
+
+# --------------------------------------------------------------------------
+# Wnck signal wiring (Layer 2). Pure Python -- operates on objects passed in,
+# so this stays importable without gi/X (only run() actually touches X).
+# --------------------------------------------------------------------------
+
+
+def window_props(window) -> tuple:
+    """Extract (class, title) for rule matching. Class group name is the WM_CLASS
+    we match against (e.g. 'Firefox', 'PasswordSafe (wxWidgets)')."""
+    cls = window.get_class_group_name() or window.get_class_instance_name() or ""
+    title = window.get_name() or ""
+    return cls, title
+
+
+def consider(engine: "Engine", window) -> None:
+    """Run a single window through the place-once core."""
+    cls, title = window_props(window)
+    engine.place(window.get_xid(), cls, title, window)
+
+
+def connect_signals(screen, engine: "Engine") -> None:
+    """Wire window-opened / name-changed / window-closed onto the engine.
+
+    name-changed is the whole point: it fires when an extension rewrites a
+    title after creation (Simple Tab Groups prepending a group prefix), which
+    is the event devilspie2 cannot react to.
+    """
+    def on_name_changed(window):
+        consider(engine, window)
+
+    def on_window_opened(_screen, window):
+        log.debug("window-opened: %s", window_props(window))
+        consider(engine, window)
+        window.connect("name-changed", on_name_changed)
+
+    def on_window_closed(_screen, window):
+        engine.forget(window.get_xid())
+
+    screen.connect("window-opened", on_window_opened)
+    screen.connect("window-closed", on_window_closed)
+
+    # Already-open windows: place once now and watch for later title changes.
+    for window in screen.get_windows():
+        consider(engine, window)
+        window.connect("name-changed", on_name_changed)
