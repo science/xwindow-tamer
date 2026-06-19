@@ -257,8 +257,14 @@ Relevant existing files (on the host):
       center monitor). Place-once "no jumping" (#3) not exercised to avoid data
       risk. dp2 disabled reversibly (firefox-placement.lua.disabled, watcher
       service stopped) — pwsafe.lua still active as fallback.
-- [ ] Phase 2: port pwsafe/watcher, retire dp2, install+enable systemd unit
-      (`systemd/xwindow-tamer.service` drafted; not yet installed/enabled)
+- [x] **Phase 2: COMPLETE** (2026-06-18). `install.sh`/`uninstall.sh` + `bin/`
+      launcher install a systemd user service (`xwindow-tamer.service`,
+      enabled+active) and a `~/.local/bin/xwindow-tamer` symlink, both pointing
+      back at the repo. devilspie2 fully retired: apt-purged (+ orphaned
+      libconfig++9v5/liblua5.1-0), and expunged from yadm (tracked configs,
+      both apt manifests, test sections) — replaced by a dp2-removal guard +
+      xwindow-tamer tests in test-dotfiles.sh, and a bootstrap clone+install
+      hook (bambam-only). pwsafe is now covered by the `passwordsafe` rule.
 
 ## 12. Open decisions (ask the user)
 
