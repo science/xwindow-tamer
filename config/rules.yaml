@@ -1,0 +1,27 @@
+# xwindow-tamer placement rules.
+#
+# Matched top-to-bottom, first match wins.
+#   match.class  -- regex (IGNORECASE) over the Wnck class group/instance
+#   match.title  -- regex over the window name
+#   a missing match key is a wildcard
+#   place.workspace -- 1-based here (engine converts to 0-based)
+rules:
+  - name: firefox-calendar
+    match: { class: Firefox, title: '^Calendar -' }
+    place: { monitor: DP-1, maximize: true }
+
+  - name: firefox-mail
+    match: { class: Firefox, title: '^Mail -' }
+    place: { monitor: DP-4, maximize: true }
+
+  - name: firefox-th            # stash under Mail on center; minimize keeps it raisable
+    match: { class: Firefox, title: '^Th -' }
+    place: { monitor: DP-4, maximize: true, minimize: true }
+
+  - name: firefox-rpg
+    match: { class: Firefox, title: '^RPG' }
+    place: { workspace: 2 }
+
+  - name: passwordsafe          # WM_CLASS "PasswordSafe (wxWidgets)"
+    match: { class: PasswordSafe }
+    place: { monitor: DP-4, geometry: { width: 1025, height: 750, center: true } }
