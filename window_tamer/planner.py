@@ -41,6 +41,16 @@ class Workspace:
     index: int
 
 
+def _centered(mon: Monitor, width: int, height: int) -> Move:
+    """A Move that centers a width x height box within `mon`."""
+    return Move(
+        mon.x + (mon.width - width) // 2,
+        mon.y + (mon.height - height) // 2,
+        width,
+        height,
+    )
+
+
 def plan(rule: Rule, monitors: dict[str, Monitor]) -> list:
     """Build the ordered action list for placing a window per `rule`."""
     place = rule.place
@@ -55,13 +65,15 @@ def plan(rule: Rule, monitors: dict[str, Monitor]) -> list:
         if place.geometry is not None:
             g = place.geometry
             if g.center:
-                x = mon.x + (mon.width - g.width) // 2
-                y = mon.y + (mon.height - g.height) // 2
+                actions.append(_centered(mon, g.width, g.height))
             else:
-                x, y = mon.x, mon.y
-            actions.append(Move(x, y, g.width, g.height))
+                actions.append(Move(mon.x, mon.y, g.width, g.height))
         else:
-            actions.append(Move(mon.x, mon.y, mon.width, mon.height))
+            # A centered half-monitor "landing box" -- NOT a full-monitor box.
+            # muffin won't reposition a full-monitor-WIDTH window onto the center
+            # monitor (it snaps to an edge), so we land a smaller box squarely
+            # inside the target monitor; maximize() then resizes to the work area.
+            actions.append(_centered(mon, mon.width // 2, mon.height // 2))
             if place.maximize:
                 actions.append(Maximize(mon.name))
 
