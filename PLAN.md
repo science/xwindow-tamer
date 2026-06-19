@@ -249,9 +249,16 @@ Relevant existing files (on the host):
 - [x] **C5 engine dedup — GREEN (5 tests)**
 - [x] **Layer 2: X wiring + `--dry-run`/`--once` + smoke** — dry-run smoke maps
       Calendar/Mail/Th/RPG correctly; live (non-dry) execution still needs UAT.
-- [ ] Layer 3: UAT (human — needs a watched cold Firefox restart)
-- [ ] Phase 2: port pwsafe/watcher, retire dp2, systemd unit
-      (`systemd/xwindow-tamer.service` drafted)
+- [x] **Layer 3: UAT — PASSED** (2026-06-18). Cold Firefox restart placed
+      Calendar→DP-1, Mail/Th→DP-4 (Th minimized + raisable), RPG→workspace 2,
+      all maximized; non-matching windows never blocked. Fixed a live bug: the
+      maximize-path Move must be a centered sub-monitor landing box, not a
+      full-monitor box (muffin won't reposition a full-width window onto the
+      center monitor). Place-once "no jumping" (#3) not exercised to avoid data
+      risk. dp2 disabled reversibly (firefox-placement.lua.disabled, watcher
+      service stopped) — pwsafe.lua still active as fallback.
+- [ ] Phase 2: port pwsafe/watcher, retire dp2, install+enable systemd unit
+      (`systemd/xwindow-tamer.service` drafted; not yet installed/enabled)
 
 ## 12. Open decisions (ask the user)
 
