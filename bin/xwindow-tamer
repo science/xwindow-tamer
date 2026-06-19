@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Launcher for xwindow-tamer.
+#
+# Runs the daemon on the SYSTEM /usr/bin/python3 — the only interpreter with the
+# apt-provided gi/Wnck bindings (a venv without --system-site-packages cannot
+# import Wnck). Resolves the repo from this script's real path (works when
+# invoked via the ~/.local/bin symlink) and puts it on PYTHONPATH, so the daemon
+# runs regardless of the current directory. Editing the repo IS the deploy.
+set -euo pipefail
+REPO="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+exec env PYTHONPATH="$REPO" /usr/bin/python3 -m window_tamer "$@"

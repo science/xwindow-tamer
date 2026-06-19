@@ -127,16 +127,27 @@ not pip — a virtualenv without `--system-site-packages` cannot import Wnck.
 ./scripts/test.sh smoke    # dry-run against live windows (needs X; moves nothing)
 ```
 
-To run at login, install the user service (adjust paths/connectors for your
-machine):
+To run it at login, use the installer:
 
 ```bash
-cp systemd/xwindow-tamer.service ~/.config/systemd/user/
-systemctl --user enable --now xwindow-tamer
+./install.sh      # generate + enable the systemd user service, symlink the CLI
+./uninstall.sh    # remove the service and symlink (repo left in place)
 ```
 
-> Note: `WantedBy=default.target`, not `graphical-session.target` — Cinnamon does
-> not activate the latter.
+`install.sh` writes `~/.config/systemd/user/xwindow-tamer.service` whose
+`ExecStart` points back at `bin/xwindow-tamer` **in this repo**, and symlinks
+`~/.local/bin/xwindow-tamer` to the same launcher — so editing the repo *is* the
+deploy, with no copy step to drift out of sync. The launcher always runs on
+`/usr/bin/python3` (the interpreter with the apt gi/Wnck bindings).
+
+> The unit uses `WantedBy=default.target`, not `graphical-session.target` —
+> Cinnamon does not activate the latter. `Restart=on-failure` with
+> `StartLimitIntervalSec=0` keeps retrying if the service starts before X is
+> reachable at login.
+
+On this author's machine the install is driven automatically by `yadm
+bootstrap`, which clones this repo into `~/dev/xwindow-tamer` and runs
+`install.sh`.
 
 ## License
 
