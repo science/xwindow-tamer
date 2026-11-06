@@ -58,9 +58,10 @@ def main(argv=None):
     log.info("rules: %s", [r.name for r in rules])
 
     def execute(window, actions):
-        apply_actions(window, actions, monitors, screen)
+        apply_actions(window, actions, engine.monitors, screen)
 
-    engine = Engine(rules, monitors, execute, dry_run=args.dry_run)
+    engine = Engine(rules, monitors, execute, dry_run=args.dry_run,
+                    refresh_monitors=load_monitors)
 
     if args.once:
         for window in screen.get_windows():

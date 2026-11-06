@@ -22,6 +22,6 @@ rules:
     match: { class: Firefox, title: '^RPG' }
     place: { workspace: 2 }
 
-  - name: passwordsafe          # WM_CLASS "PasswordSafe (wxWidgets)"
-    match: { class: PasswordSafe }
-    place: { monitor: DP-4, geometry: { width: 1025, height: 750, center: true } }
+  - name: passwordsafe          # WM_CLASS "PasswordSafe (wxWidgets)"; HDMI-0 = right
+    match: { class: PasswordSafe }   # (falls back to primary if HDMI-0 is absent)
+    place: { monitor: HDMI-0, geometry: { width: 1025, height: 750, center: true } }

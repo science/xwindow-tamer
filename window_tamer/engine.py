@@ -28,11 +28,15 @@ class Engine:
         monitors: dict[str, Monitor],
         execute: Execute,
         dry_run: bool = False,
+        refresh_monitors: Optional[Callable[[], dict[str, Monitor]]] = None,
     ):
         self.rules = rules
         self.monitors = monitors
         self.execute = execute
         self.dry_run = dry_run
+        # Re-read the layout per matched placement, so a monitor switched off or
+        # unplugged after startup isn't targeted from a stale snapshot.
+        self.refresh_monitors = refresh_monitors
         self.placed: set[int] = set()
 
     def place(self, xid: int, cls: str, title: str, target: object) -> Optional[Rule]:
@@ -43,6 +47,11 @@ class Engine:
         rule = match_rule(self.rules, cls, title)
         if rule is None:
             return None
+        if self.refresh_monitors is not None:
+            try:
+                self.monitors = self.refresh_monitors()
+            except Exception:
+                log.exception("monitor refresh failed; keeping previous layout")
         actions = plan(rule, self.monitors)
         if self.dry_run:
             log.info("[dry-run] %s -> %s: %s", title, rule.name, actions)

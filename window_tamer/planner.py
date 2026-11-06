@@ -7,10 +7,14 @@ Actions are the plan vocabulary the executor knows how to run:
   Minimize()                -- stash (stays raisable from the taskbar)
   Workspace(index)          -- move to 0-based workspace index
 """
+import logging
 from dataclasses import dataclass
+from typing import Optional
 
 from .monitors import Monitor
 from .rules import Rule
+
+log = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -51,6 +55,20 @@ def _centered(mon: Monitor, width: int, height: int) -> Move:
     )
 
 
+def _resolve_monitor(name: str, monitors: dict[str, Monitor]) -> Optional[Monitor]:
+    """The named monitor, or a fallback when it is absent (switched off, unplugged,
+    not enumerated): the primary, else the leftmost. None if there are no monitors."""
+    if name in monitors:
+        return monitors[name]
+    if not monitors:
+        log.warning("monitor %s not present and no monitors known; skipping move", name)
+        return None
+    primary = [m for m in monitors.values() if m.primary]
+    fallback = primary[0] if primary else min(monitors.values(), key=lambda m: m.x)
+    log.warning("monitor %s not present; falling back to %s", name, fallback.name)
+    return fallback
+
+
 def plan(rule: Rule, monitors: dict[str, Monitor]) -> list:
     """Build the ordered action list for placing a window per `rule`."""
     place = rule.place
@@ -59,8 +77,8 @@ def plan(rule: Rule, monitors: dict[str, Monitor]) -> list:
     if place.workspace is not None:
         actions.append(Workspace(place.workspace))
 
-    if place.monitor is not None:
-        mon = monitors[place.monitor]
+    mon = _resolve_monitor(place.monitor, monitors) if place.monitor is not None else None
+    if mon is not None:
         actions.append(Unmaximize())
         if place.geometry is not None:
             g = place.geometry

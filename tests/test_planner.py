@@ -80,3 +80,38 @@ def test_monitor_move_without_maximize():
     # centered landing box. DP-3 @3840 -> (4320, 270, 960, 540).
     r = _rule(Place(monitor="DP-3"))
     assert plan(r, MONS) == [Unmaximize(), Move(4320, 270, 960, 540)]
+
+
+# --- missing-monitor fallback -------------------------------------------------
+# A rule's monitor can be absent (switched off, unplugged, or not enumerated at
+# startup). Placement must degrade to a monitor that exists -- the primary, else
+# the leftmost -- instead of raising KeyError and leaving the window unplaced.
+
+
+def test_missing_monitor_falls_back_to_primary():
+    # HDMI-0 is not in MONS; primary is DP-4 -> same box as the DP-4 case above.
+    r = _rule(
+        Place(monitor="HDMI-0", geometry=Geometry(width=1025, height=750, center=True))
+    )
+    assert plan(r, MONS) == [Unmaximize(), Move(2367, 165, 1025, 750)]
+
+
+def test_missing_monitor_maximize_targets_fallback_name():
+    r = _rule(Place(monitor="HDMI-0", maximize=True))
+    assert plan(r, MONS) == [Unmaximize(), Move(2400, 270, 960, 540), Maximize("DP-4")]
+
+
+def test_missing_monitor_without_primary_falls_back_to_leftmost():
+    no_primary = parse_listmonitors(
+        """Monitors: 2
+ 0: +DP-3 1920/527x1080/296+1920+0  DP-3
+ 1: +DP-1 1920/527x1080/296+0+0  DP-1
+"""
+    )
+    r = _rule(Place(monitor="HDMI-0", maximize=True))
+    assert plan(r, no_primary) == [Unmaximize(), Move(480, 270, 960, 540), Maximize("DP-1")]
+
+
+def test_no_monitors_at_all_skips_monitor_actions():
+    r = _rule(Place(workspace=1, monitor="HDMI-0", maximize=True))
+    assert plan(r, {}) == [Workspace(1)]

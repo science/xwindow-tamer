@@ -83,3 +83,51 @@ def test_dry_run_computes_but_does_not_execute():
     assert rule is not None      # but a decision was made (for logging)
     # still deduped: a second event is a no-op
     assert eng.place(xid=4, cls="Firefox", title="Mail - Inbox", target="win4") is None
+
+
+# --- monitor refresh ----------------------------------------------------------
+# The layout is re-read on every matched placement so a monitor that disappears
+# after startup is not targeted from a stale snapshot.
+
+
+def test_matched_placement_uses_refreshed_monitors():
+    only_dp1 = parse_listmonitors(
+        """Monitors: 1
+ 0: +*DP-1 1920/527x1080/296+0+0  DP-1
+"""
+    )
+    calls = []
+    eng = Engine(
+        _rules(), MONS,
+        execute=lambda target, actions: calls.append(actions),
+        refresh_monitors=lambda: only_dp1,
+    )
+    eng.place(xid=1, cls="Firefox", title="Mail - Inbox", target="w")
+    # DP-4 is gone -> falls back to DP-1 (the refreshed primary).
+    assert calls[0][-1].monitor_name == "DP-1"
+    assert eng.monitors is only_dp1
+
+
+def test_refresh_failure_keeps_previous_monitors():
+    def boom():
+        raise RuntimeError("xrandr failed")
+
+    calls = []
+    eng = Engine(
+        _rules(), MONS,
+        execute=lambda target, actions: calls.append(actions),
+        refresh_monitors=boom,
+    )
+    eng.place(xid=1, cls="Firefox", title="Mail - Inbox", target="w")
+    assert calls[0][-1].monitor_name == "DP-4"
+    assert eng.monitors is MONS
+
+
+def test_non_matching_window_does_not_refresh():
+    n = []
+    eng = Engine(
+        _rules(), MONS, execute=lambda t, a: None,
+        refresh_monitors=lambda: n.append(1) or MONS,
+    )
+    eng.place(xid=1, cls="Firefox", title="Some page", target="w")
+    assert n == []
